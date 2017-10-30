@@ -8,7 +8,7 @@ function w_estimate = tac_reconstruction(Output, Dic, lambda,MAXITER)
 % ============= Inputs ===============
 % y                                    : output, in the paper $y(t) =
 %                                           (x(t+\delta)-x(t))/\delta$;
-% A                                    : dictionary matrix;
+% Dic                                    : dictionary matrix; 
 % lambda                         : the tradeoff parameter you should use, 
 %                                          basically, it is proportional to
 %                                          the invese of the variance, e.g. 1;
@@ -27,15 +27,19 @@ function w_estimate = tac_reconstruction(Output, Dic, lambda,MAXITER)
 %   1.0 (Sep ?, 2012)
 %%
 
+% Delta criterion to determine convergence
 delta = 1e-6;
 
-[M,N]=size(Dic);
-% initialisation of the variables
+% The dictionary is a MXN (timeXstates)
+[M,N]=size(Dic); 
+
+% Initialisation/preallocation of the variables
 U=ones(N, MAXITER);
 Gamma=zeros(N, MAXITER);
 UU=zeros(N, MAXITER);
 w_estimate=zeros(N, MAXITER);
 WWW=ones(N, MAXITER);
+
 fprintf(1, 'Finding a sparse feasible point using l1-norm heuristic ...');
 
 for iter=1:1:MAXITER
@@ -44,12 +48,18 @@ for iter=1:1:MAXITER
     cvx_begin quiet
     cvx_solver sedumi   %sdpt3
     variable W(N)
+    % The cost function where we minimise the weights
     minimize    (lambda*norm( U(:,iter).*W, 1 )+ 0.5*sum((Dic* W-Output).^2) )
     %                 subject to
     %                           W.^2-ones(101,1)<=0;
     cvx_end
     
+    % This seems a bit different than in then in pg185 of paper, where you
+    % say - minimise the difference while penalising for orders
     
+    % I think what changes here with the updating is that the paper invents
+    % some way of updating the coefficients which then penalises
+    % differently for each weight, giving to a more optimal (?) solution
     w_estimate(:,iter)=W;
     WWW(:,iter)=W;
     Gamma(:,iter)=U(:,iter).^-1.*W;
@@ -58,6 +68,8 @@ for iter=1:1:MAXITER
     U(:,iter+1)=abs(sqrt(UU(:, iter)));
     
     for i=1:N
+        % This is a function which tells when it is sufficiently small it
+        % is actually zero, where we give delta for sufficiently small
         if   w_estimate(i,iter).^2/norm(w_estimate(:,iter))^2<delta
             w_estimate(i,iter)=0;
         end
