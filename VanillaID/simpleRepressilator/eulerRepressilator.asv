@@ -6,17 +6,15 @@ function  [w_ours, error] = eulerRepressilator(state)
     lambda = 0.01;
     MAXITER = 5;
     realState = 6;
-    orderOfHill = 4;
     X = zeros(timePoints,realState);
     X(1,:) = [1,1,1,20,10,10];
 
     % If we need additional time series (state larger than real state 6, we
     % just use extra zero coefficients, so the system generates just noise
     if (state > 6)
-        w_tru = zeros(state + 2*state*orderOfHill)
-    else
-        w_tru = zeros(54,realState);
-    end
+    w_tru = zeros(state + 28
+    w_tru = zeros(54,realState);
+
     % Gene 1 - repressed by protein3, degradation
     w_tru(1,1) = -0.20;
     w_tru(48,1) = 10;
