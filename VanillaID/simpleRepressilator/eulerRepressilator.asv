@@ -5,14 +5,11 @@ function  [w_ours, error] = eulerRepressilator(state)
     noise = 0.01;
     lambda = 0.01;
     MAXITER = 5;
+
     realState = 6;
     X = zeros(timePoints,realState);
     X(1,:) = [1,1,1,20,10,10];
 
-    % If we need additional time series (state larger than real state 6, we
-    % just use extra zero coefficients, so the system generates just noise
-    if (state > 6)
-    w_tru = zeros(state + 28
     w_tru = zeros(54,realState);
 
     % Gene 1 - repressed by protein3, degradation
@@ -51,7 +48,7 @@ function  [w_ours, error] = eulerRepressilator(state)
         X(k,:)=X(k-1,:) + ...
             samplingRate*Phi(k-1,:)*w_tru+ ... % coeff determine which affect X
             + noise*randn(1,6); % added noise
-
+        
         % Take the derivative using a difference eq. and known sampling rate
         Y(k-1,:)=  (X(k,:)-X(k-1,:))/samplingRate; 
     end

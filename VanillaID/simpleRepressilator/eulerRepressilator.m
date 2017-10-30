@@ -5,18 +5,19 @@ function  [w_ours, error] = eulerRepressilator(state)
     noise = 0.01;
     lambda = 0.01;
     MAXITER = 5;
-    realState = 6;
-    orderOfHill = 4;
-    X = zeros(timePoints,realState);
-    X(1,:) = [1,1,1,20,10,10];
 
-    % If we need additional time series (state larger than real state 6, we
-    % just use extra zero coefficients, so the system generates just noise
+    realState = 6;
     if (state > 6)
-        w_tru = zeros(state + 2*state*orderOfHill)
+            X = zeros(timePoints,state);
+        X(1,:) = [1,1,1,20,10,10, zeros(1,state-realState)];
     else
-        w_tru = zeros(54,realState);
+         X = zeros(timePoints,realState);
+        X(1,:) = [1,1,1,20,10,10];
+   
     end
+    
+    w_tru = zeros(54,realState);
+
     % Gene 1 - repressed by protein3, degradation
     w_tru(1,1) = -0.20;
     w_tru(48,1) = 10;
@@ -49,11 +50,15 @@ function  [w_ours, error] = eulerRepressilator(state)
                sHill(X(k-1,:),4,state)];
 
         % Generate next time step of X 
-
-        X(k,:)=X(k-1,:) + ...
-            samplingRate*Phi(k-1,:)*w_tru+ ... % coeff determine which affect X
+        
+        %disp(size(Phi(k-1,1:6)))
+        %disp(size(w_tru))
+        X(k,1:6)=X(k-1,1:6) + ...
+            samplingRate*Phi(k-1,1:54)*w_tru+ ... % coeff determine which affect X
             + noise*randn(1,6); % added noise
-
+        if (state > 6)
+            X(k,7:state) = X(k-1,7:state) + randn;
+        end
         % Take the derivative using a difference eq. and known sampling rate
         Y(k-1,:)=  (X(k,:)-X(k-1,:))/samplingRate; 
     end

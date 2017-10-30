@@ -5,12 +5,13 @@
 % see if the error decreases, thus proving that the system can correctly
 % identify how many measurements are needed?
 
-error = zeros(1,6);
-for state=1:6
+stateToTest = 15;
+error = zeros(1,stateToTest);
+for state=1:stateToTest
     [wthrow, error(state)] = eulerRepressilator(state);
 end
 
-plot(1:6,error);
+plot(1:stateToTest,error);
 xlabel("number of states used");
 ylabel("difference of sparsity ratios");
 title("Error curve");
