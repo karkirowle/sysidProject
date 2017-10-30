@@ -10,8 +10,7 @@ allStates = 6;
 error = zeros(allStates,stateToTest);
 for measurement=1:allStates
     for state=1:stateToTest
-        [wthrow, error(measurement,state)] = eulerRepressilator(state, ...
-            measurement);
+        [wthrow, error(measurement,state)] = eulerRepressilator(state);
     end
 end
 
@@ -28,7 +27,8 @@ hold on;
 plot(1:stateToTest,error(5,:));
 hold on;
 plot(1:stateToTest,error(6,:));
-legend('state 1','state2','state3','state4','state5','state6')
+legend('state 1
+
 xlabel("number of states used");
 ylabel("difference of sparsity ratios");
 title("Error curve");
