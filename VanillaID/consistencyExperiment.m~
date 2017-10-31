@@ -35,12 +35,12 @@
 
 % Experimental setting 2
 
-stateToTest = 10;
-allStates = 3;
+stateToTest = 15;
+allStates = 6;
 error = zeros(allStates,stateToTest);
 for measurement=1:allStates
     for state=1:stateToTest
-        [wthrow, error(measurement,state)] = threegenenet(state, ...
+        [wthrow, error(measurement,state)] = eulerRepressilator(state, ...
             measurement);
     end
 end

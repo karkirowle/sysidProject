@@ -1,5 +1,5 @@
 % Euler method repressilator
-function  [w_ours, error] = threegenenet(state, which)
+function  [w_ours, error] = fivegenenet(state, which)
 % state - the number of states to use for predicting (a number greater
 % equal than 1)
 % which - which state to predict (a number from 1-6)
@@ -9,35 +9,40 @@ timePoints = 100;
 noise = 0.01;
 lambda = 0.01;
 MAXITER = 5;
-realState = 3;
+realState = 5;
 h = 4;
 
-% Initialise the measurement simulation with random numbers
-X = zeros(timePoints, state);
-X(1,:) = 30 + 20*randn(1,state);
 
-% if (state > 3)
-%     X = zeros(timePoints,state);
-%     X(1,:) = [20,10,10, zeros(1,state-realState)];
-% else
-%     X = zeros(timePoints,realState);
-%     X(1,:) = [20,10,10];
-%     
-% end
+
+if (state > 5)
+    X = zeros(timePoints,state);
+    X(1,:) = [20,10,10,20,10, zeros(1,state-realState)];
+else
+    X = zeros(timePoints,realState);
+    X(1,:) = [20,10,10,20,10];
+    
+end
 
 functionNumber = realState + h*2*realState;
 w_tru = zeros(realState + h*2*realState,realState);
-% 25,26,27 activate g1-g2-g3
-% 22,23,24 repress g1-g2-g3
+% Total of 45
+% 36,37,38,39,40 activate g1-5
+% 41,42,43,44,45 repress g1-5
 % Gene 1 - inhibited by gene 3, degradation
 w_tru(1,1) = -0.20;
-w_tru(24,1) = 0.3;
+w_tru(43,1) = 0.3;
 % Gene 2 - inhibited by gene 1, degradation
 w_tru(2,2) = -0.20;
-w_tru(22,2) = 0.3;
+w_tru(41,2) = 0.3;
 % Gene 3 - activated by gene 2, degradation
 w_tru(3,3) = -0.20;
-w_tru(26,3) = 0.3;
+w_tru(37,3) = 0.3;
+% Gene 4 - inhibited by gene 5, degradation
+w_tru(4,4) = -0.20;
+w_tru(45,3) = 0.3;
+% Gene 5 - inhibited by gene 4, degradation
+w_tru(5,5) = -0.20;
+w_tru(44,3) = 0.3;
 
 
 for k=2:timePoints
@@ -47,12 +52,12 @@ for k=2:timePoints
         sHill(X(k-1,:),3,realState), ...
         sHill(X(k-1,:),4,realState)];
     % Here we need to modify that not for all generated, but rather just
-    % the number
-    Phi2(k-1,:) = [ X(k-1,:), ...
-        sHill(X(k-1,:),1,state), ...
-        sHill(X(k-1,:),2,state), ...
-        sHill(X(k-1,:),3,state), ...
-        sHill(X(k-1,:),4,state)];
+    % the number observed
+    Phi2(k-1,:) = [ X(k-1,1:state), ...
+        sHill(X(k-1,1:state),1,state), ...
+        sHill(X(k-1,1:state),2,state), ...
+        sHill(X(k-1,1:state),3,state), ...
+        sHill(X(k-1,1:state),4,state)];
     
     % Generate next time step of X
     
@@ -60,7 +65,7 @@ for k=2:timePoints
 %     disp(size(w_tru))
     X(k,1:realState)=X(k-1,1:realState) + ...
         samplingRate*Phi(k-1,1:functionNumber)*w_tru+ ... % coeff determine which affect X
-        + noise*randn(1,3); % added noise
+        + noise*randn(1,realState); % added noise
     if (state > realState)
         X(k,(realState+1):state) = X(k-1,(realState+1):state) + noise*randn(1,3);
     end
