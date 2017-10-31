@@ -39,10 +39,10 @@ w_tru(3,3) = -0.20;
 w_tru(37,3) = 0.3;
 % Gene 4 - inhibited by gene 5, degradation
 w_tru(4,4) = -0.20;
-w_tru(45,3) = 0.3;
+w_tru(45,4) = 0.3;
 % Gene 5 - inhibited by gene 4, degradation
 w_tru(5,5) = -0.20;
-w_tru(44,3) = 0.3;
+w_tru(44,5) = 0.3;
 
 
 for k=2:timePoints
