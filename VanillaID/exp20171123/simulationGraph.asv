@@ -1,0 +1,29 @@
+classdef simulationGraph
+   % Simulation array
+   properties (Access = public)
+       numberOfGenes
+       hillOrder
+       weightMatrix
+   end
+   methods
+       function obj = simulationGraph(numberOfGenes,hillOrder)
+           obj.numberOfGenes = numberOfGenes;
+           obj.hillOrder = hillOrder;
+           obj.weightMatrix = zeros(numberOfGenes + ...,
+               hillOrder*2*numberOfGenes,numberOfGenes);
+       end
+       function obj = degradation(obj, degraded, amount)
+           obj.weightMatrix(degraded,degraded) = -amount;
+       end
+       function repression(obj, repressedBy, repressed, amount, order)
+           % Total linear states, total previous order states + repressor
+           % gene number
+           row = numberOfGenes + (order-1)*repressedBy + repre
+           obj.weightMatrix(numberOfGenes,repressed)
+       end
+       function activation(obj, repressedBy, repressed, amount, order)
+           obj.weightMatrix(degraded,degraded) = -amount;
+       end
+   end
+   
+end
