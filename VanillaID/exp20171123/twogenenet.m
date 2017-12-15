@@ -17,6 +17,10 @@ realState = 2;
 h = 4;
 initialConditions = [20,10,10];
 
+% Interpretation
+timeLag = 2;
+
+
 % ------------------------- Initial conditions ----------------------------
 
 % If more measurement states are supposed generate extra initial conditions
@@ -24,40 +28,44 @@ initialConditions = [20,10,10];
 if (state > realState)
     X = zeros(timePoints,state);
     % TODO: Maybe ones would be a better choice?
-    X(1,:) = [initialConditions, zeros(1,state-realState)];
+    X(1:(1+timeLag),:) = repmat( [initialConditions, ...
+            zeros(1,state-realState)], timeLag+1, 1);
 else
-    X = initialConditions;
+    %X = zeros(timePoints,state);
+    X(1:(1+timeLag),:) = repmat(initialConditions, timeLag+1, 1);
 end
+
+disp("Start of X")
+disp(X)
+disp("End of initial X");
 
 % ------------------------- Simulation graph ------------------------------
 
 % Simulation settings
-simulation = simulationGraph(2,4);
+simulation = simulationGraph(2,4,0);
 simulation = simulation.degradation(1,0.2);
 simulation = simulation.degradation(2,0.2);
-simulation = simulation.repression(1,2, 0.3, 4);
-simulation = simulation.repression(2,1, 0.3, 4);
+simulation = simulation.repression(1,2, 0.5, 4);
+simulation = simulation.repression(2,1, 0.5, 4);
 w_tru = simulation.weightMatrix;
 functionNumber = size(w_tru,1);
 
+% Interpretation graph -> expecting state many nodes with order of 4
+interpretation = simulationGraph(state,4,timeLag);
+
+
 % ------------------------- Euler simulation ------------------------------
 
-for k=2:timePoints
+for k=(2+timeLag):timePoints
     % Simulation dictionary functions
-    Phi(k-1,:) = [ X(k-1,:), ...
-        sHill(X(k-1,:),1,realState), ...
-        sHill(X(k-1,:),2,realState), ...
-        sHill(X(k-1,:),3,realState), ...
-        sHill(X(k-1,:),4,realState)];
-    
+    Phi(k-1,:) = simulation.getNextDictionary(X(k-1,:), false);
+    % feed 20 10 10 in
     % Identification dictionary functions
     % Uses only the number observed
-    Phi2(k-1,:) = [ X(k-1,1:state), ...
-        sHill(X(k-1,1:state),1,state), ...
-        sHill(X(k-1,1:state),2,state), ...
-        sHill(X(k-1,1:state),3,state), ...
-        sHill(X(k-1,1:state),4,state)];
-    
+    % feed 20 20 10 two times in, but one gene so that 20;20
+    Phi2(k-1,:) = interpretation.getNextDictionary(X((k-1-timeLag) ...
+        :(k-1),1:state), true);
+
     % Generate next time step of X
     X(k,1:realState)=X(k-1,1:realState) + ...
         samplingRate*Phi(k-1,1:functionNumber)*w_tru + ... 
@@ -78,6 +86,14 @@ end
 
 w_ours =  tac_reconstruction(Y(:,which), Phi2, lambda,MAXITER);
 disp(w_ours);
+
+% Interpretation graph
+interpretation.weightMatrix = w_ours;
+interpretation.plotMotif(0:0.001:5,1);
+title('Reconstructed motif of two-gene toy example')
+xlabel('Increasing concentration of gene 1')
+ylabel('Concentration effect on itself');
+box off;
 
 end
 
