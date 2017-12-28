@@ -53,23 +53,29 @@ classdef simulationGraph
                + activatedBy;
            obj.weightMatrix(row,activated) = amount;
        end
-       function Phi = getNextDictionary(obj, X)
+       function [Phi, funcList] = getNextDictionary(obj, X)
            % Construct next dictionary step from given X at lag/cur t
            % Interpretation boolean flag is for the bias term
-          
+           counter = 0;
+
            % Add bias term to dictionary if this is an intepretation graph
            if (obj.bias)
+               
                Phi = 1;
+               counter = counter+1;
+               funcList{counter} = 'bias';
            else
+               
                Phi= [];
+          
            end
            
            % Add polynomial terms to dictionary
-           for j =1:(obj.timeLag+1)
+           for j =1:(obj.timeLag+1) % TODO: Consider again what this timelag does, consider order of fors compared to Hill
                for k=1:obj.polynomialOrder
-                   disp(j)
-                   disp(k)
-                   Phi = [Phi, X(j,:).^k];
+                   counter = counter+1;
+                   funcList{counter} = ['polynom', num2str(k)];
+                   Phi = [Phi, X(j,:).^k]; % Linear X(1,:)
                end
            end
            
@@ -79,15 +85,22 @@ classdef simulationGraph
            % So H1 H(t-1)1 H2 H2(t-1)
            for i=1:obj.hillOrder
                for j=1:(obj.timeLag+1)
+                   counter = counter+1;
+                   funcList{counter} = ['hill' num2str(i)];
                    Phi = [Phi, sHill(X(j,:),i,obj.numberOfGenes)];
                end
            end
        end
-       function plotMotif(obj, interval, gene)
+       function funcList = plotMotif(obj, interval, gene)
            % Uses the weightmatrix and a given interval to plot motif
-           counter = 1;
+           counter = 0;
            % Adding bias term
-           hillTerm(counter,:) = obj.weightMatrix(1,gene) .* interval;
+           if (obj.bias)
+               counter = counter + 1;
+               funcList{counter} = 'bias';
+            hillTerm(counter,:) = obj.weightMatrix(1,gene) .* interval;
+            
+           end
            % Adding polynomial terms
            for l=1:(obj.timeLag+1)
                for k=1:(obj.polynomialOrder)
@@ -95,10 +108,15 @@ classdef simulationGraph
                currentInterval = zeros(size(interval));
                currentInterval(l:end) = interval(l:end);
                % Coefficient determination
-               coeff = 1 + gene + obj.numberOfGenes*(k-1) + ...
+               coeff = obj.bias + gene + obj.numberOfGenes*(k-1) + ...
                    obj.numberOfGenes*(l-1);
+               disp(coeff)
                counter = counter + 1;
-               hillTerm(counter,:) = obj.weightMatrix(coeff,gene) .* ...
+               funcList{counter} = ['polynomial', ...
+                   'order:' num2str(k), ...
+                   'timeLag:' num2str(l), ...
+                   'coeff:' num2str(coeff)];
+               hillTerm(counter,:) = obj.weightMatrix(coeff,1) .* ...
                    currentInterval.^k;
                end
            end
@@ -109,28 +127,34 @@ classdef simulationGraph
                    currentInterval(l:end) = interval(l:end);
                    for k=1:2
                        if (mod(k,2) == 1)
-                           coeff = 1 + ...
+                           coeff = obj.bias + ...
                                obj.amountOfNonHill + ...
                                (h-1)*obj.functionPerHill + ...
                                (l-1)*(obj.functionPerHill/(obj.timeLag+1)) + ...
                                gene;
                            counter = counter + 1;
+                           funcList{counter} = ['hill repressive ', ...
+                               'order: ' num2str(k), ...
+                               'timeLag: ' num2str(l), ...
+                               'coeff: ', num2str(coeff)];
                             hillTerm(counter,:) = obj.weightMatrix(coeff ...
-                                ,gene) .* ...
+                                ,1) .* ...
                                 (1./(1+interval.^h));
                        end
                        if (mod(k,2) == 0) % else is also valid
-                           coeff = 1 + ...
+                           coeff = obj.bias + ...
                                obj.amountOfNonHill + ...
                                (h-1)*obj.functionPerHill + ...
                                (l-1)*(obj.functionPerHill/(obj.timeLag+1)) + ...
+                               obj.numberOfGenes + ...
                                gene;
+                        
                            counter = counter + 1;
-                           disp(coeff)
-                           disp(h)
-                           disp(l)
+                      funcList{counter} = ['hill activation', ...
+                          'order:' num2str(k), 'timeLag:' num2str(l), ...
+                          'coeff:' num2str(coeff)];
                            hillTerm(counter,:) = obj.weightMatrix(coeff ...
-                               ,gene) .* interval.^h/(1+interval.^h);
+                               ,1) .* interval.^h/(1+interval.^h);
                        end
                        
                    end

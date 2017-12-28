@@ -1,4 +1,4 @@
-function w_estimate = tac_reconstruction(Output, Dic, lambda,MAXITER)
+function [w_estimate, cost] = tac_reconstruction(Output, Dic, lambda,MAXITER)
 %%
 % This is a VANILA implementation of the follwing paper
 % 
@@ -57,9 +57,6 @@ for iter=1:1:MAXITER
     % This seems a bit different than in then in pg185 of paper, where you
     % say - minimise the difference while penalising for orders
     
-    % I think what changes here with the updating is that the paper invents
-    % some way of updating the coefficients which then penalises
-    % differently for each weight, giving to a more optimal (?) solution
     w_estimate(:,iter)=W;
     WWW(:,iter)=W;
     Gamma(:,iter)=U(:,iter).^-1.*W;
@@ -68,12 +65,14 @@ for iter=1:1:MAXITER
     U(:,iter+1)=abs(sqrt(UU(:, iter)));
     
     for i=1:N
-        % This is a function which tells when it is sufficiently small it
-        % is actually zero, where we give delta for sufficiently small
         if   w_estimate(i,iter).^2/norm(w_estimate(:,iter))^2<delta
             w_estimate(i,iter)=0;
         end
     end
-     
+    
+   
 end
+
+% The final cost where the algorithm quits
+cost = lambda*norm( U(:,iter).*w_estimate(:,iter), 1 ) + 0.5*sum((Dic* w_estimate(:,iter)-Output).^2);
 
