@@ -11,7 +11,7 @@ samplingRate = 1;
 timePoints = 100;
 noise = 0;
 lambda = 0;
-MAXITER = 20;
+MAXITER = 5;
 realState = 2;
 h = 4;
 initialConditions = [20,10]; 
@@ -52,7 +52,7 @@ functionNumber = size(w_tru,1);
 % Interpretation graph -> expecting state many nodes with order of 4
 %interpretation = simulationGraph(state,4,timeLag,1,true);
 % coincides with simulation when timeLag = 0, bias = false, state = 1
-interpretation = simulationGraph(state,h,timeLag,1,false);
+interpretation = simulationGraph(1,h,timeLag,1,false); % here i modi
 
 % ------------------------- Euler simulation ------------------------------
 
@@ -82,6 +82,8 @@ for k=(2+timeLag):timePoints
 end
 
 % ------------------------- Reconstruction --------------------------------
+disp(size(Y(:, which)));
+disp(size(Phi2));
 [w_ours,cost] =  tac_reconstruction(Y(:,which), Phi2, lambda,MAXITER);
 
 
