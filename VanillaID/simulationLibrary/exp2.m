@@ -32,8 +32,9 @@ interpret = interpret.addBasisFunction(@(x) x./(1+x).^4);
 
 
 [interpet, estimate, cost] = interpret.reconstruct(timeSeries(1:99,1), derivativeSeries(:,1));
-motifSeries = interpret.motifCalculation(0:0.1:100, estimate,1);
+motifSeries = interpret.motifCalculation(0:0.1:10, estimate,1);
 figure;
-plot(motifSeries);
+plot(0:0.1:10,motifSeries, 'LineWidth', 1.5);
+title('Motif is positive in whole interval but decreasing')
 xlabel('concentration of Gene 1')
 ylabel('concentration derivative effect on Gene 1')

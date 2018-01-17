@@ -49,6 +49,7 @@ for iter=1:1:MAXITER
     cvx_solver sedumi   %sdpt3
     variable W(N)
     % The cost function where we minimise the weights
+    % Right is norm term
     minimize    (lambda*norm( U(:,iter).*W, 1 )+ 0.5*sum((Dic* W-Output).^2) )
     %                 subject to
     %                           W.^2-ones(101,1)<=0;

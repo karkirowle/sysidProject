@@ -28,6 +28,10 @@ interpret = interpret.addBasisFunction(@(x) x./(1+x).^2);
 interpret = interpret.addBasisFunction(@(x) x./(1+x).^3);
 interpret = interpret.addBasisFunction(@(x) x./(1+x).^4);
 
+disp("cucc")
+
+disp(size(timeSeries))
+disp(size(derivativeSeries))
 
 [interpet, estimate, cost] = interpret.reconstruct(timeSeries(1:99,1), derivativeSeries(:,1));
 motifSeries = interpret.motifCalculation(0:0.1:100, estimate,1);

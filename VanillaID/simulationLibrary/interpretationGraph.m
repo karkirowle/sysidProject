@@ -24,6 +24,7 @@ classdef interpretationGraph
                 for j=1:numFunctions
                     coeff1 = 1 + (j-1)*states;
                     coeff2 = j*states;
+                    % This evaluates the function for all states/genes
                     Phi(k,coeff1:coeff2) = obj.basisFunctions{j}(timeSeries(k,:));
                 end
             end
