@@ -6,8 +6,8 @@ clear;
 close all;
 
 % Tolerance parameter for unit tests
-tolerance = 0.01;
-testNumber = 1;
+tolerance = 0.1;
+testNumber = 5;
 
 % Generate time series
 [timeSeries, derivativeSeries, coefficients] = ..., 
@@ -25,7 +25,6 @@ interpret = interpret.addBasisFunction(@(x) x./(1+x).^2);
 interpret = interpret.addBasisFunction(@(x) x./(1+x).^3);
 interpret = interpret.addBasisFunction(@(x) x./(1+x).^4);
 
-
 for i=1:testNumber
     tempTime = reshape(timeSeries(i,1:(end-1),1:2), [(size(timeSeries,2) -1) ,2]);
     tempDeriv = derivativeSeries(i,:,1).';
@@ -34,9 +33,9 @@ for i=1:testNumber
     % Identification
     try 
     [interpret, estimate1, ~] = interpret.reconstruct(tempTime, ...,
-        tempDeriv);
+        tempDeriv,0.1);
     [interpret, estimate2, ~] = interpret.reconstruct(tempTime, ...,
-        tempDeriv2);
+        tempDeriv2,0.1);
     estimateMatrix(i,:,:) = [estimate1, estimate2];
     
     % Tests
@@ -49,3 +48,5 @@ for i=1:testNumber
     end
 end
 
+disp("Ratio of passed tests:");
+disp(sum(sum(test))/(4*testNumber));

@@ -29,11 +29,11 @@ classdef interpretationGraph
                 end
             end
         end
-        function [obj, w_estimate, cost] = reconstruct(obj, timeSeries, derivativeSeries)
+        function [obj, w_estimate, cost] = reconstruct(obj, timeSeries, derivativeSeries, lambda)
             Phi = constructDictionary(obj,timeSeries);
             disp(size(Phi));
             disp(size(derivativeSeries));
-            [estimate_temp, cost] = tac_reconstruction(derivativeSeries, Phi, 0, 5);
+            [estimate_temp, cost] = tac_reconstruction(derivativeSeries, Phi, lambda, 5);
             w_estimate = estimate_temp(:,5);
         end
         function motifSeries = motifCalculation(obj, motifInterval, w_estimate, byWhich)
@@ -41,7 +41,7 @@ classdef interpretationGraph
             numFunctions = length(obj.basisFunctions);
             coefficients = byWhich:obj.numberOfGenes:(obj.numberOfGenes*numFunctions);
             disp(coefficients);
-                for j=1:numFunctions
+                for j=2:numFunctions
                     counter = counter + 1;
                     motifSeries(counter,:) = w_estimate(coefficients(j))*obj.basisFunctions{j}(motifInterval);
                 end

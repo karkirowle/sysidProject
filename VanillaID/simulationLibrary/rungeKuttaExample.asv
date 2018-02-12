@@ -1,0 +1,33 @@
+% RungeKutta simulation example
+
+numberOfGenes = 3;
+tspan = [0 100];
+initialConditions = [10,10,10];
+noise = 3;
+
+assert(length(initialConditions) == numberOfGenes, ...
+              'You havent provided the right amount initial conditions for the simulation!');
+fun1 = @(x) x;
+fun2 = @(x) 1./(1+x);
+basisSum{1} = fun1;
+basisSum{2} = fun2;
+geneIdentifier(1) = 1;
+geneIdentifier(2) = 2;
+% Ez már kapásból nem jó, mert nem tudhatod hogy a function handle ugyanazt
+% kapja e, tehát a summingot már csak a függvényen belül tudod megcsinálni
+
+[t,x]=ode45(@(t,x) odefun(t,x,noise, basisSum, geneIdentifier),tspan,initialConditions,noise);
+
+% Aim: sum the basis functions which could depend on each other 
+function [f ] = odefun(t,x,noise, basisFunctions, geneIdentifier)
+    % Example basis functions
+    f = 0;
+    for i=1:2
+        f = f + basisFunctions{i}(x(geneIdentifier(i));
+    end
+    % Any information for the basis function inputs have to be given here
+
+
+    f=basisFunctions(x);
+    %f=f+noise*randn(numberOfBasis,1);
+end

@@ -21,13 +21,12 @@ classdef simGraph
             obj.geneList(end+1) = gene;
         end
         function [derivativeSeries, results, timePoints] = runRungeKutta(obj, initialConditions, noise, tspan)
- 
             assert(length(initialConditions) == obj.numberOfGenes, ...
                 'You havent provided the right amount initial conditions for the simulation!');
             [t,x]=ode45(@(t,x) rungeKuttaHelper(obj,t,x,noise),tspan,initialConditions,noise);
             results = x;
             timePoints = t;
-            derivativeSeries = derivativeEvaluator(obj,results);
+            derivativeSeries = derivativeEvaluator(timePoints);
         end
         function [f] = rungeKuttaHelper(obj,~,x,noise)
             f = zeros(obj.numberOfGenes,1);
@@ -44,7 +43,7 @@ classdef simGraph
                 f(k) = f(k) + noise*randn;
             end
         end
-        function derivativeSeries = derivativeEvaluator(obj,timeSeries)
+        function derivativeSeries = derivativeEvaluator(timeSeries)
             derivativeSeries = zeros(size(timeSeries));
            for k = 1:obj.numberOfGenes
                geneIndex = find(obj.geneIdentifier == k);
