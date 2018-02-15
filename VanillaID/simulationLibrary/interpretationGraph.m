@@ -1,4 +1,4 @@
-classdef interpretationGraph
+ow  classdef interpretationGraph
     properties (Access = public)
       basisFunctions
       geneIdentifier
