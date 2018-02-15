@@ -18,6 +18,9 @@ classdef geneGraph
         function [derivativeSeries, timeSeries] = runSimulation(obj, initialConditions, timeStep, noise, h)
             [derivativeSeries, timeSeries] = obj.simulationGraph.runSimulation(initialConditions, timeStep, noise, h);
         end
+        function [derivativeSeries, results, timePoints] = runRungeKutta(obj, initialConditions, noise, tspan)
+            [derivativeSeries, results, timePoints] = obj.simulationGraph.runRungeKutta(obj, initialConditions, noise, tspan);
+        end
     end
 end
 

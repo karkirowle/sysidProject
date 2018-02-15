@@ -1,7 +1,7 @@
 CHANGELOG
 ---------------------------------------------------------------------------
 
-2018/02/18
+2018/02/13
 
 tac_reconstruction.m
 After finding discrepancies between original paper and tac 
@@ -16,3 +16,8 @@ one element shorter than timeseries length
 TODO: Checking RungeKutta simulation noise addition is right. It might need some changes due
 to being a Wiener process.
 TODO: Implementing geneGraph wrapper
+
+2018/02/15
+
+geneGraph.m
+Gene graph RungeKutta wrapper done
