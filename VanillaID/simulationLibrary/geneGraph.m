@@ -30,13 +30,15 @@ classdef geneGraph
             [derivativeSeries, timeSeries] = obj.simulationGraph.runSimulation(initialConditions, timeStep, noise, h);
         end
         function [derivativeSeries, results, timePoints] = runRungeKutta(obj, initialConditions, noise, tspan)
-            [derivativeSeries, results, timePoints] = obj.simulationGraph.runRungeKutta(obj, initialConditions, noise, tspan);
+            [derivativeSeries, results, timePoints] = obj.simulationGraph.runRungeKutta(initialConditions, noise, tspan);
         end
         function showGraph(obj, ~)
             h = plot(obj.digraph, 'EdgeLabel', obj.digraph.Edges.Weight);
             for i=2:length(obj.highlight)
-                geneNodes= table2array(obj.digraph.Edges(i-1,1));
-                highlight(h,{geneNodes{1}},{geneNodes{2}},'EdgeColor','r');
+                if (obj.highlight(i) == 1)
+                    geneNodes= table2array(obj.digraph.Edges(i-1,1));
+                    highlight(h,{geneNodes{1}},{geneNodes{2}},'EdgeColor','r');
+                end
             end
         end
     end

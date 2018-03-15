@@ -31,7 +31,9 @@ for i=1:testNumber
     tempDeriv2 = derivativeSeries(i,:,2).';
 
     % Identification
-    try 
+    try
+        disp(size(tempTime));
+        disp(size(tempDeriv));
     [interpret, estimate1, ~] = interpret.reconstruct(tempTime, ...,
         tempDeriv,0.1);
     [interpret, estimate2, ~] = interpret.reconstruct(tempTime, ...,

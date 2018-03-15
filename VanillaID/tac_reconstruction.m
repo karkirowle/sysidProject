@@ -62,7 +62,6 @@ for iter=1:1:MAXITER
     WWW(:,iter)=W;
     Gamma(:,iter)=U(:,iter).^-1.*abs(W);
     Dic0=lambda*eye(M)+Dic*diag(Gamma(:,iter))*Dic';
-    % A dic0 meg a dic fel van itt cserélve
     UU(:, iter)=diag(Dic'*(Dic0\Dic));
     U(:,iter+1)=abs(sqrt(UU(:, iter)));
     

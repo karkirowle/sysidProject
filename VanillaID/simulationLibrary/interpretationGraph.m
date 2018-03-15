@@ -1,4 +1,4 @@
-ow  classdef interpretationGraph
+classdef interpretationGraph
     properties (Access = public)
       basisFunctions
       geneIdentifier
@@ -18,7 +18,7 @@ ow  classdef interpretationGraph
         end
         function Phi = constructDictionary(obj, timeSeries)
             timeSpan = size(timeSeries,1);
-            states = size(timeSeries,2);
+            states = size(timeSeries,2); % TODO: This should be equal to number of genes
             numFunctions = length(obj.basisFunctions);
             for k=1:timeSpan
                 for j=1:numFunctions
@@ -40,7 +40,6 @@ ow  classdef interpretationGraph
             counter = 0;
             numFunctions = length(obj.basisFunctions);
             coefficients = byWhich:obj.numberOfGenes:(obj.numberOfGenes*numFunctions);
-            disp(coefficients);
                 for j=2:numFunctions
                     counter = counter + 1;
                     motifSeries(counter,:) = w_estimate(coefficients(j))*obj.basisFunctions{j}(motifInterval);
