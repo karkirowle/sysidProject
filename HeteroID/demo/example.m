@@ -67,7 +67,7 @@ for replicate = 1:parameter.replicate
     t= 1:size(x,1);
     
     cut_i = CUT(replicate);
-    Data_mat = x(start:start+cut_i,:);
+    Data_mat = x(start:start+cut_i,:); % start, start + cut i, starts here at 1, cut i is 13, so 1:14
     t_mat = dt*t(start:start+cut_i);
     A_mat = A_mat(start:start+cut_i-1,:);
     Y_mat = (Data_mat(2:end,:) - Data_mat(1:end-1,:))/dt;

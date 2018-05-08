@@ -1,0 +1,10 @@
+% Comments regarding the assumptions made on heteroReproductin.m
+
+% 1. It was not clear that in the linear framework, how the denominator having
+a parameter can be still linear in parameters, if we don't use the UKF framework,so
+I have taken the repression Hill type of 1
+
+% 2. Bias is not included at the moment
+
+% 3. It would be nice to have an automated way of construction the
+ground Truth matrices

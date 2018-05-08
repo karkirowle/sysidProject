@@ -1,0 +1,14 @@
+Reconstruction lambda,SNR,Data length,RNMSE1,RNMSE2,Sparsity
+0.005,0,1,Ill-conditioned
+0.005,0,2,Ill-conditioned
+0.005,0,3,Ill-conditioned
+0.005,0,4,Ill-conditioned
+0.005,0,5,Ill-conditioned
+0.005,0,6,Ill-conditioned
+0.005,0,7,Ill-conditioned
+0.005,0,8,Ill-conditioned
+0.005,0,9,Ill-conditioned
+0.005,0,10,Ill-conditioned
+0.005,0,11,Ill-conditioned
+0.005,0,12,Ill-conditioned
+0.005,0,13,Ill-conditioned

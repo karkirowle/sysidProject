@@ -1,4 +1,4 @@
-function [w_estimate, cost] = tac_reconstruction(Output, Dic, lambda,MAXITER)
+function [w_out, cost, w_unpruned, penalty, ols, convergenceGamma] = tac_reconstruction(Output, Dic, lambda,MAXITER)
 %%
 % This is a VANILA implementation of the follwing paper
 % 
@@ -27,8 +27,10 @@ function [w_estimate, cost] = tac_reconstruction(Output, Dic, lambda,MAXITER)
 %   1.0 (Sep ?, 2012)
 %%
 
-% Delta criterion to determine convergence
+% Delta criterion to determine convergence of w
 delta = 1e-6;
+% Delta criterion to determine convergence of Gamma
+delta2 = 1e-2;
 
 % The dictionary is a MXN (timeXstates)
 [M,N]=size(Dic); 
@@ -40,11 +42,11 @@ UU=zeros(N, MAXITER);
 w_estimate=zeros(N, MAXITER);
 WWW=ones(N, MAXITER);
 
-fprintf(1, 'Finding a sparse feasible point using l1-norm heuristic ...');
+fprintf(1, 'Sparsity optimisation ...');
 
 for iter=1:1:MAXITER
     
-    fprintf('This is round %d \n', iter);
+    fprintf('Round %d ', iter);
     cvx_begin quiet
     cvx_solver sedumi   %sdpt3
     variable W(N)
@@ -55,9 +57,6 @@ for iter=1:1:MAXITER
     %                           W.^2-ones(101,1)<=0;
     cvx_end
     
-    % This seems a bit different than in then in pg185 of paper, where you
-    % say - minimise the difference while penalising for orders
-    
     w_estimate(:,iter)=W;
     WWW(:,iter)=W;
     Gamma(:,iter)=U(:,iter).^-1.*abs(W);
@@ -65,15 +64,33 @@ for iter=1:1:MAXITER
     UU(:, iter)=diag(Dic'*(Dic0\Dic));
     U(:,iter+1)=abs(sqrt(UU(:, iter)));
     
+    w_unpruned = w_estimate(:,iter);
+
     for i=1:N
         if   w_estimate(i,iter).^2/norm(w_estimate(:,iter))^2<delta
             w_estimate(i,iter)=0;
         end
     end
     
-   
+    %Termination of loop on convergence only if iter > 5
+    if (iter > 5)
+       % Claim convergence when difference of last sample and mean
+       % of last five is less than some delta
+       meanGamma = mean(Gamma(:,iter-4:iter),2);
+       lastGamma = Gamma(:,iter);
+       normGamma = norm(meanGamma - lastGamma)/norm(lastGamma);
+       if (normGamma < delta2)
+            convergenceGamma = true;
+            break;
+       end
+    end
+    convergenceGamma = true;
 end
 
-% The final cost where the algorithm quits
-cost = lambda*norm( U(:,iter).*w_estimate(:,iter), 1 ) + 0.5*sum((Dic* w_estimate(:,iter)-Output).^2);
+% Output only the last estimate, because amount of iterations is not known
+w_out = w_estimate(:, iter);
 
+% The final cost where the algorithm quits
+cost = lambda*norm( U(:,iter).*w_out, 1 ) + 0.5*sum((Dic* w_out-Output).^2);
+penalty = lambda*norm( U(:,iter).*W, 1 );
+ols = 0.5*sum((Dic* w_out-Output).^2);

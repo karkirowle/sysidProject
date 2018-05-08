@@ -75,7 +75,6 @@ classdef simGraph
                    currentFunction = obj.basisFunctions(currentIndex);
                    currentWeight = obj.weightList(currentIndex);
                    currentData = results(i-1,obj.geneList(currentIndex));
-              
                    results(i, k) = results(i, k) + h*currentWeight*currentFunction{1}(currentData);
                end
                results(i,k) = results(i,k) + noise*randn;

@@ -1,0 +1,16 @@
+Reconstruction lambda,SNR,Data length,MNSE
+0.005,1000,1,Ill-conditioned
+0.005,1000,2,Ill-conditioned
+0.005,1000,3,Ill-conditioned
+0.005,1000,4,Ill-conditioned
+0.005,1000,5,Ill-conditioned
+0.005,1000,6,Ill-conditioned
+0.005,1000,7,Ill-conditioned
+0.005,1000,8,Ill-conditioned
+0.005,1000,9,Ill-conditioned
+0.005,1000,10,Ill-conditioned
+0.005,1000,11,Ill-conditioned
+0.005,1000,12,Ill-conditioned
+0.005,1000,13,Ill-conditioned
+0.005,1000,14,Ill-conditioned
+0.005,1000,15,Ill-conditioned

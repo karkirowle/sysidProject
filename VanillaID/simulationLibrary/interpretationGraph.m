@@ -16,7 +16,7 @@ classdef interpretationGraph
         function obj = addBasisFunction(obj, fun)
             obj.basisFunctions(end+1) = {fun};
         end
-        function Phi = constructDictionary(obj, timeSeries)
+        function Phi = constructDictionary(obj, timeSeries, bias)
             timeSpan = size(timeSeries,1);
             states = size(timeSeries,2); % TODO: This should be equal to number of genes
             numFunctions = length(obj.basisFunctions);
@@ -27,15 +27,31 @@ classdef interpretationGraph
                     % This evaluates the function for all states/genes
                     Phi(k,coeff1:coeff2) = obj.basisFunctions{j}(timeSeries(k,:));
                 end
+                if (bias)
+                Phi(k, numFunctions*states + 1) = 1;
+                end
             end
         end
         function [obj, w_estimate, cost] = reconstruct(obj, timeSeries, derivativeSeries, lambda)
-            Phi = constructDictionary(obj,timeSeries);
-            disp(size(Phi));
-            disp(size(derivativeSeries));
-            [estimate_temp, cost] = tac_reconstruction(derivativeSeries, Phi, lambda, 5);
+            Phi = constructDictionary(obj,timeSeries, false);
+            
+%             disp(size(Phi));
+%             disp(size(derivativeSeries));
+            [estimate_temp, cost, ~, ~, ~] = tac_reconstruction(derivativeSeries, Phi, lambda, 5);
             w_estimate = estimate_temp(:,5);
         end
+        function [obj, w_estimate, cost, w_unprunedOut, penalty, ols] = reconstructUnpruned(obj, timeSeries, derivativeSeries, lambda, bias)
+             [w_estimate, cost, w_unprunedOut, penalty, ols, ~]  = ...,
+                reconstructSetIter(timeSeries, derivativeSeries, ...,
+                lambda, bias, 5);
+        end
+        function [obj, w_estimate, cost, w_unprunedOut, penalty, ols, convergenceGamma] = reconstructSetIter(obj, timeSeries, derivativeSeries, lambda, bias, iter)
+            Phi = constructDictionary(obj,timeSeries, bias);
+            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma] = ...,
+                tac_reconstruction(derivativeSeries, Phi, lambda, iter);
+            %w_estimate = estimate_temp(:,iter);
+            w_unprunedOut = w_unpruned;
+        end 
         function motifSeries = motifCalculation(obj, motifInterval, w_estimate, byWhich)
             counter = 0;
             numFunctions = length(obj.basisFunctions);
