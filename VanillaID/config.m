@@ -12,3 +12,7 @@ addpath('simulationLibrary');
 % the thesis
 
 addpath('simulationFiles');
+
+% Other stuff (graph formatting)
+
+addpath('utilities');

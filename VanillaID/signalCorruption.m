@@ -1,15 +1,28 @@
 % Adds measurement noise to the time series and the derivative series
-function [corruptedTimeSeries, corruptedDerivative, noiseStd] =  ...,
-    signalCorruption(timeSeries,derivativeSeries, SNR)
+function [corruptedDerivative, noiseStd] =  ...,
+    signalCorruption(derivativeSeries, SNR)
 
-% White gaussian noise added to time series
-corruptedTimeSeries = awgn(timeSeries,SNR,'measured');
+% Parameters
+M = size(derivativeSeries,1);
+N = size(derivativeSeries,2);
 
-% White gaussian noise added to derivative series
-corruptedDerivative = awgn(derivativeSeries,SNR,'measured');
+% Preallocation
+sigPower = zeros(1,N);
+
+% Noise power is estimated for each channel of derivatives
+for i=1:N
+    sigPower(i) = sum(abs(derivativeSeries(:,i)).^2)/length(derivativeSeries(:,i));
+end
+
+% Warning if noiseStd are very different for each channel
+if (max(sigPower) - min(sigPower) > 100)
+   warning('Channel signal powers vary largely. SNR estimate might be inaccurate!');
+end
 
 % Signal to noise ratio is measured std / noise std
-sigPower = sum(abs(timeSeries(:)).^2)/length(timeSeries(:));
-noisePower = sigPower/SNR;
+noisePower = mean(sigPower,2)./SNR;
 noiseStd = sqrt(noisePower);
+
+% Noise sampled for a WGN
+corruptedDerivative = derivativeSeries + noiseStd.*randn(M,N);
 end

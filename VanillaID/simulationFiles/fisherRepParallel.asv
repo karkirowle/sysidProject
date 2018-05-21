@@ -13,20 +13,16 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:100;
-%alpha = 5 * 10^(-6); % Scalar multiplier of measurement noise
-%SNR = [10^(3), 10^(2), 10^(1)];
-SNR = 30;
+measurements = 1:40;
+SNR = [50,40,30,20,10];
 lambda = 20;
-% SNR 40 ~ Lambda = 10
-% SNR 30 ~ Lambda = ?
-% SNR 20 ~ Lambda = ?
-%lambda = [5*10^(-3), 10, 1000];
-%lambda = alpha.*SNR;
 numRealisations = 1;
 
 
 % -------------------------------------------------------------------------
+
+% Fetching date for filename
+filenameDate = datetime('today');
 
 % Setting the seed to ensure reproducibility of experimental results
 rng('default');
@@ -58,7 +54,7 @@ numFunctions = length(interpret.basisFunctions)*nodes;
 % Preallocation
 fisherDetMatrix = zeros(length(SNR),numRealisations,length(measurements),nodes);
 mseMatrix = zeros(length(SNR),numRealisations,length(measurements),nodes);
-estimate = zeros(length(SNR),numRealisations,numFunctions, nodes);
+estimate = zeros(length(SNR),numRealisations,length(measurements),numFunctions, nodes);
 
 % Runge Kutta simulation
 for i=1:length(SNR)
@@ -90,11 +86,9 @@ for i=1:length(SNR)
         % IMPORTANT NOTE: Here we only corrupt the time series!
         [derivativeSeries, timeSeries] = ...,
             sim.runRungeKutta(initialConditions, 0, 0:0.01:10);
-        [corrTime, ~, noiseStd] =  ...,
-            signalCorruption(timeSeries,derivativeSeries, SNR(i));
-        lambda(i) = max(0.005, 20*noiseStd);
-        % Check that the dynamics look right
-        %plot(timeSeries);
+        [corrDer, noiseStd] =  ...,
+            signalCorruption(derivativeSeries, SNR(i));
+        lambda(i) = max(0.005, noiseStd^2);
         for j=1:length(measurements)
             % Sample data points with the maximal Fisher information
             if(j==1)
@@ -102,7 +96,7 @@ for i=1:length(SNR)
                 idx = idx(1);
                 F = 0;
             else
-                Phi = interpret.constructDictionary(corrTime, false);
+                Phi = interpret.constructDictionary(timeSeries, false);
                 [F,idx] = maxFisherDictionary(Phi', lambda(i), idx);
             end
             
@@ -113,9 +107,9 @@ for i=1:length(SNR)
                 for l=1:nodes
                     [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
                         interpret.reconstructSetIter( ...,
-                        corrTime(idx,:),...,
+                        timeSeries(idx,:),...,
                         derivativeSeries(idx,l),lambda(i), false, 30);
-                    estimate(i,r,:,l) = estimateTemp;
+                    estimate(i,r,j,:,l) = estimateTemp;
                     fisherDetMatrix(i,r,j,l) = F;
                     mseMatrix(i,r,j,l) = ...,
                         norm(estimateTemp-groundTruth(:,l),2)/ ...,
@@ -134,10 +128,11 @@ for i=1:length(SNR)
                     ',', 'Ill-conditioned',newline];
             end
         end
-        save(['run_', num2str(length(measurements)), '_',  ...,
-            num2str(numRealisations), '_',));
+        save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+            num2str(numRealisations)]);
     end
-      save('trialRun');
+      save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+            num2str(numRealisations)]);
 end
 
 

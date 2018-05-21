@@ -14,15 +14,8 @@ close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
 measurements = 1:40;
-%alpha = 5 * 10^(-6); % Scalar multiplier of measurement noise
-%SNR = [10^(3), 10^(2), 10^(1)];
 SNR = [50,40,30,20,10];
 lambda = 20;
-% SNR 40 ~ Lambda = 10
-% SNR 30 ~ Lambda = ?
-% SNR 20 ~ Lambda = ?
-%lambda = [5*10^(-3), 10, 1000];
-%lambda = alpha.*SNR;
 numRealisations = 1;
 
 
@@ -30,6 +23,7 @@ numRealisations = 1;
 
 % Fetching date for filename
 filenameDate = datetime('today');
+
 % Setting the seed to ensure reproducibility of experimental results
 rng('default');
 
@@ -94,19 +88,8 @@ for i=1:length(SNR)
             sim.runRungeKutta(initialConditions, 0, 0:0.01:10);
         [corrDer, noiseStd] =  ...,
             signalCorruption(derivativeSeries, SNR(i));
-        lambda(i) = max(0.005, noiseStd^2);
-        % Check that the dynamics look right
-%         figure;
-%         plot(corrDer, 'LineWidth', 1.5);
-%         xlabel('time', 'FontSize', 12);
-%         ylabel('concentration derivative', 'FontSize', 12);
-%         title(['Concentration derivatives for SNR =', num2str(SNR(i))], 'FontSize', 20);
-%         xlim([0 1000]);
-%         run('figureFormatter');
-%         
-%         figure;
-%         plot(timeSeries);
-        for j=1:length(measurements)
+        lambda = max(0.005, noiseStd^2);
+        parfor j=1:length(measurements)
             % Sample data points with the maximal Fisher information
             if(j==1)
                 idx = randperm(length(measurements));
@@ -114,7 +97,7 @@ for i=1:length(SNR)
                 F = 0;
             else
                 Phi = interpret.constructDictionary(timeSeries, false);
-                [F,idx] = maxFisherDictionary(Phi', lambda(i), idx);
+                [F,idx] = maxFisherDictionary(Phi', lambda, idx);
             end
             
            try
@@ -125,7 +108,7 @@ for i=1:length(SNR)
                     [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
                         interpret.reconstructSetIter( ...,
                         timeSeries(idx,:),...,
-                        derivativeSeries(idx,l),lambda(i), false, 30);
+                        derivativeSeries(idx,l),lambda, false, 30);
                     estimate(i,r,j,:,l) = estimateTemp;
                     fisherDetMatrix(i,r,j,l) = F;
                     mseMatrix(i,r,j,l) = ...,
@@ -133,14 +116,14 @@ for i=1:length(SNR)
                         norm(groundTruth(:,l),2);
                     
                 end
-                resultsRow = [num2str(lambda(i)), ',', ...,
+                resultsRow = [num2str(lambda), ',', ...,
                     num2str(SNR(i)), ',', num2str(measurements(j)),...,
                     ',' num2str(fisherDetMatrix(i,r,j,l)), ',', ...,
                     num2str(mse(i,r,j,l)), newline];
                 disp(resultsRow);
            catch
                 disp('Failed')
-                resultsRow = [num2str(lambda(i)), ',', ...,
+                resultsRow = [num2str(lambda), ',', ...,
                     num2str(SNR(i)), ',', num2str(measurements(j)), ...,
                     ',', 'Ill-conditioned',newline];
             end
