@@ -89,21 +89,17 @@ for i=1:length(SNR)
         [corrDer, noiseStd] =  ...,
             signalCorruption(derivativeSeries, SNR(i));
         lambda = max(0.005, noiseStd^2);
+        
+        % Calculate batch ordering of maximal Fisher information
+        Phi = interpret.constructDictionary(timeSeries, false);
+        [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', lambda, ...,
+            length(measurements));
+        
         parfor j=1:length(measurements)
             % Sample data points with the maximal Fisher information
-            if(j==1)
-                idx = randperm(length(measurements));
-                idx = idx(1);
-                F = 0;
-            else
-                Phi = interpret.constructDictionary(timeSeries, false);
-                [F,idx] = maxFisherDictionary(Phi', lambda, idx);
-            end
+
             
-           try
-                disp(['Working on: ', ' SNR:' num2str(SNR(i)),  ...,
-                    ' DataAmount:', num2str(measurements(j)), ...,
-                    'Fisher Information', num2str(F)]);
+         %  try
                 for l=1:nodes
                     [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
                         interpret.reconstructSetIter( ...,
@@ -121,12 +117,12 @@ for i=1:length(SNR)
                     ',' num2str(fisherDetMatrix(i,r,j,l)), ',', ...,
                     num2str(mse(i,r,j,l)), newline];
                 disp(resultsRow);
-           catch
-                disp('Failed')
-                resultsRow = [num2str(lambda), ',', ...,
-                    num2str(SNR(i)), ',', num2str(measurements(j)), ...,
-                    ',', 'Ill-conditioned',newline];
-            end
+%            catch
+%                 disp('Failed')
+%                 resultsRow = [num2str(lambda), ',', ...,
+%                     num2str(SNR(i)), ',', num2str(measurements(j)), ...,
+%                     ',', 'Ill-conditioned',newline];
+%             end
         end
         save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
