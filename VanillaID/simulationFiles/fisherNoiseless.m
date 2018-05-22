@@ -14,22 +14,21 @@ close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
 measurements = 1:40;
-%alpha = 5 * 10^(-6); % Scalar multiplier of measurement noise
-%SNR = [10^(3), 10^(2), 10^(1)];
-SNR = [50,40,30,20,10];
+SNR = 50;
 lambda = 20;
-% SNR 40 ~ Lambda = 10
-% SNR 30 ~ Lambda = ?
-% SNR 20 ~ Lambda = ?
-%lambda = [5*10^(-3), 10, 1000];
-%lambda = alpha.*SNR;
 numRealisations = 1;
 
 
 % -------------------------------------------------------------------------
 
 % Fetching date for filename
-filenameDate = datetime('today');
+filenameDate = datetime('now','Format','default');
+dateChar = char(filenameDate);
+dateChar(dateChar == ' ') = '_';
+dateChar(dateChar == '-') = '_';
+dateChar(dateChar == ':') = '_';
+
+
 % Setting the seed to ensure reproducibility of experimental results
 rng('default');
 
@@ -147,10 +146,10 @@ for i=1:length(SNR)
 %                     ',', 'Ill-conditioned',newline];
 %             end
         end
-        save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+        save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
     end
-      save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+      save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
 end
 

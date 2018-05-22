@@ -13,16 +13,20 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:40;
+measurements = 1:50;
 SNR = [50,40,30,20,10];
-lambda = 20;
-numRealisations = 1;
+numRealisations = 100;
 
 
 % -------------------------------------------------------------------------
 
 % Fetching date for filename
-filenameDate = datetime('today');
+filenameDate = datetime('now','Format','default');
+dateChar = char(filenameDate);
+dateChar(dateChar == ' ') = '_';
+dateChar(dateChar == '-') = '_';
+dateChar(dateChar == ':') = '_';
+
 
 % Setting the seed to ensure reproducibility of experimental results
 rng('default');
@@ -52,7 +56,7 @@ end
 numFunctions = length(interpret.basisFunctions)*nodes;
 
 % Preallocation
-fisherDetMatrix = zeros(length(SNR),numRealisations,length(measurements),nodes);
+fisherDetMatrix = zeros(length(SNR),numRealisations,length(measurements));
 mseMatrix = zeros(length(SNR),numRealisations,length(measurements),nodes);
 estimate = zeros(length(SNR),numRealisations,length(measurements),numFunctions, nodes);
 
@@ -94,29 +98,30 @@ for i=1:length(SNR)
         Phi = interpret.constructDictionary(timeSeries, false);
         [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', lambda, ...,
             length(measurements));
-        
+        fisherDetMatrix(i,r,:) = fisherInfos;
+        figure;
+        plot(derivativeSeries);
         parfor j=1:length(measurements)
             % Sample data points with the maximal Fisher information
-
+           currentIdx = idx(1:j);
             
          %  try
                 for l=1:nodes
                     [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
                         interpret.reconstructSetIter( ...,
-                        timeSeries(idx,:),...,
-                        derivativeSeries(idx,l),lambda, false, 30);
+                        timeSeries(currentIdx,:),...,
+                        corrDer(currentIdx,l),lambda, false, 30);
                     estimate(i,r,j,:,l) = estimateTemp;
-                    fisherDetMatrix(i,r,j,l) = F;
                     mseMatrix(i,r,j,l) = ...,
                         norm(estimateTemp-groundTruth(:,l),2)/ ...,
                         norm(groundTruth(:,l),2);
                     
                 end
-                resultsRow = [num2str(lambda), ',', ...,
-                    num2str(SNR(i)), ',', num2str(measurements(j)),...,
-                    ',' num2str(fisherDetMatrix(i,r,j,l)), ',', ...,
-                    num2str(mse(i,r,j,l)), newline];
-                disp(resultsRow);
+                disp('Pakk');
+%                 resultsRow = [num2str(lambda), ',', ...,
+%                     num2str(SNR(i)), ',', num2str(measurements(j)), ',', ...,
+%                     num2str(mse(i,r,j,l)), newline];
+%                 disp(resultsRow);
 %            catch
 %                 disp('Failed')
 %                 resultsRow = [num2str(lambda), ',', ...,
@@ -124,10 +129,10 @@ for i=1:length(SNR)
 %                     ',', 'Ill-conditioned',newline];
 %             end
         end
-        save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+        save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
     end
-      save(['checkpoints/run_', char(filenameDate), '_', num2str(length(measurements)), '_',  ...,
+      save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
 end
 
