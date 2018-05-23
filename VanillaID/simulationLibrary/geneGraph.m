@@ -4,7 +4,7 @@ classdef geneGraph
         numberOfGenes
         digraph
         highlight
-        standardGroundTruth % Assumes 28 dictionary functions!!!
+        standardGroundTruth % Assumes 27 dictionary functions!!!
     end
     methods
         function obj = geneGraph(numberOfGenes)

@@ -13,10 +13,9 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:40;
+measurements = 1:100;
 SNR = 50;
-lambda = 20;
-numRealisations = 1;
+numRealisations = 10;
 
 
 % -------------------------------------------------------------------------
@@ -30,7 +29,7 @@ dateChar(dateChar == ':') = '_';
 
 
 % Setting the seed to ensure reproducibility of experimental results
-rng('default');
+%rng('default');
 
 % Creating three gene repressilator topology
 nodes = 3;
@@ -45,11 +44,11 @@ interpret = interpretationGraph(1);
 interpret = interpret.addBasisFunction(@(x) x);
 
 % Hill functions added up to order 4
-for i=1:4
+for i=1:5
     interpret = interpret.addBasisFunction(@(x) 1./(1+x.^i));
 end
 
-for i=1:4
+for i=1:5
     interpret = interpret.addBasisFunction(@(x) (x.^i)./(1+x.^i));
 end
 
@@ -85,8 +84,15 @@ for i=1:length(SNR)
         initialConditions = [1; 2; 3]; % Symmetry breaking
         %initialConditions = abs(10*randn(1, nodes));
         
-        % Ground truth weights
-        groundTruth = sim.standardGroundTruth;
+        % Ground truth weights - not standard
+        groundTruth = zeros(33,1);
+        groundTruth(1,1) = -1;
+        groundTruth(2,2) = -1;
+        groundTruth(3,3) = -1;
+        groundTruth(15,1) = 40;
+        groundTruth(13,2) = 40;
+        groundTruth(14,3) = 40;
+        
         
         % IMPORTANT NOTE: Here we only corrupt the time series!
         [derivativeSeries, timeSeries] = ...,
@@ -105,36 +111,36 @@ for i=1:length(SNR)
                 [F,idx] = maxFisherDictionary(Phi', lambda(i), idx);
             end
             
-          % try
-                disp(['Working on: ', ' SNR:' num2str(SNR(i)),  ...,
-                    ' DataAmount:', num2str(measurements(j)), ...,
-                    'Fisher Information', num2str(F)]);
-                for l=1:nodes
-                    tic;
-                    [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
-                        interpret.reconstructSetIter( ...,
-                        timeSeries(idx,:),...,
-                        corrDer(idx,l),lambda(i), false, 30);
-                    toc;
-                    estimate(i,r,j,:,l) = estimateTemp;
-                    fisherDetMatrix(i,r,j,l) = F;
-                    mseMatrix(i,r,j,l) = ...,
-                        norm(estimateTemp-groundTruth(:,l),2)/ ...,
-                        norm(groundTruth(:,l),2);
-                    
-                end
-                resultsRow = [num2str(lambda(i)), ',', ...,
-                    num2str(SNR(i)), ',', num2str(measurements(j)),...,
-                    ',' num2str(fisherDetMatrix(i,r,j,l)), ',', ...,
-                    num2str(mse(i,r,j,l)), newline];
-                disp(resultsRow);
-
+            % try
+            disp(['Working on: ', ' SNR:' num2str(SNR(i)),  ...,
+                ' DataAmount:', num2str(measurements(j)), ...,
+                'Fisher Information', num2str(F)]);
+            for l=1:nodes
+                tic;
+                [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
+                    interpret.reconstructSetIter( ...,
+                    timeSeries(idx,:),...,
+                    corrDer(idx,l),lambda(i), false, 30);
+                toc;
+                estimate(i,r,j,:,l) = estimateTemp;
+                fisherDetMatrix(i,r,j,l) = F;
+                mseMatrix(i,r,j,l) = ...,
+                    norm(estimateTemp-groundTruth(:,l),2)/ ...,
+                    norm(groundTruth(:,l),2);
+                
+            end
+            resultsRow = [num2str(lambda(i)), ',', ...,
+                num2str(SNR(i)), ',', num2str(measurements(j)),...,
+                ',' num2str(fisherDetMatrix(i,r,j,l)), ',', ...,
+                num2str(mse(i,r,j,l)), newline];
+            disp(resultsRow);
+            
         end
         save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
     end
-      save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
-            num2str(numRealisations)]);
+    save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
+        num2str(numRealisations)]);
 end
 
 

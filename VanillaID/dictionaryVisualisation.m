@@ -5,7 +5,7 @@ close all;
 
 %% Load checkpoint
 addpath('checkpoints');
-load('run_18-May-2018_40_1.mat')
+load('run_22_May_2018_20_19_31_100_1')
 rmpath('checkpoints');
 load('colormapStore');
 
@@ -16,7 +16,7 @@ for i=1:length(SNR)
     %     estimateMatrix = log10(abs(squeeze(estimate(i,1,1:40,:,1))));
     %     estimateMatrix(abs(estimateMatrix) == Inf) = 0;
     %     estimateMatrix = estimateMatrix;
-    estimateMatrix = log10(abs(squeeze(estimate(i,1,1:40,:,1))));
+    estimateMatrix = log10(abs(squeeze(estimate(i,1,:,:,1))));
     %     estimateMatrix(1:40,:) = estimateMatrix./norm(estimateMatrix(1:40,:));
     %     estimateMatrix = abs(5*log10(abs(estimateMatrix)));
     %     estimateMatrix(abs(estimateMatrix) == Inf) = 0;
