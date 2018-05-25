@@ -31,7 +31,6 @@ for i=1:numFisher
     indices(selectedIdx) = [];
     
     
-    
     % Calculate fisher information for each combination
     fisherSearch = zeros(length(indices),1);
     for j=1:length(indices)

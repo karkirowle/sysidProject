@@ -13,9 +13,9 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:10;
+measurements = 1:200;
 SNR = 50;
-numRealisations = 1;
+numRealisations = 10;
 
 
 % -------------------------------------------------------------------------
@@ -87,9 +87,9 @@ for b=5:10
         groundTruth(1,1) = -1;
         groundTruth(2,2) = -1;
         groundTruth(3,3) = -1;
-        groundTruth(3*b + 3, 1) = 40;
-        groundTruth(3*b + 1, 2) = 40;
-        groundTruth(3*b + 2, 3) = 40;
+        groundTruth(15, 1) = 40;
+        groundTruth(13, 2) = 40;
+        groundTruth(14, 3) = 40;
         
         % IMPORTANT NOTE: Here we only corrupt the time series!
         [derivativeSeries, timeSeries] = ...,
