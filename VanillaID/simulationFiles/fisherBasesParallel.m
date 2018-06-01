@@ -1,5 +1,4 @@
 % Bayesian Identification of Gene Regulatory Networks
-
 % Bence Halpern 2018
 
 % ------------------------- DESCRIPTION -----------------------------------
@@ -13,10 +12,13 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:200;
-SNR = 50;
-numRealisations = 10;
+measurements = 1:100;
+SNR = 100;
+numRealisations = 100;
 
+% Server parameters
+clusterNumber = 7;
+parpool('local',clusterNumber)
 
 % -------------------------------------------------------------------------
 
@@ -31,7 +33,12 @@ dateChar(dateChar == ':') = '_';
 % Setting the seed to ensure reproducibility of experimental results
 rng('default');
 
-for b=5:10
+
+fisherDetMatrixStruct = cell(1,5);
+mseMatrixStruct = cell(1,5);
+estimateStruct = cell(1,5);
+
+for b=6:10
     
     % Creating three gene repressilator topology
     nodes = 3;
@@ -100,7 +107,7 @@ for b=5:10
         
         % Calculate batch ordering of maximal Fisher information
         Phi = interpret.constructDictionary(timeSeries, false);
-        [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', lambda, ...,
+        [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', 10^(-5), ...,
             length(measurements));
         fisherDetMatrix(r,:) = fisherInfos';
         figure;

@@ -13,10 +13,13 @@ clear;
 close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
-measurements = 1:50;
-SNR = [50,40,30,20,10];
+measurements = 1:200;
+SNR = [10,1,1/2];
 numRealisations = 100;
 
+% Server parameters
+clusterNumber = 16;
+parpool('local',clusterNumber)
 
 % -------------------------------------------------------------------------
 
@@ -59,6 +62,7 @@ numFunctions = length(interpret.basisFunctions)*nodes;
 fisherDetMatrix = zeros(length(SNR),numRealisations,length(measurements));
 mseMatrix = zeros(length(SNR),numRealisations,length(measurements),nodes);
 estimate = zeros(length(SNR),numRealisations,length(measurements),numFunctions, nodes);
+corrDerMatrix = zeros(length(SNR),numRealisations,1001,nodes);
 
 % Runge Kutta simulation
 for i=1:length(SNR)
@@ -89,8 +93,10 @@ for i=1:length(SNR)
         
         [derivativeSeries, timeSeries] = ...,
             sim.runRungeKutta(initialConditions, 0, 0:0.01:10);
+        % IMPORTANT NOTE: Here we only corrupt the derivative series!
         [corrDer, noiseStd] =  ...,
             signalCorruption(derivativeSeries, SNR(i));
+        corrDerMatrix(i,r,:,:) = corrDer;
         lambda = max(0.005, noiseStd^2);
         
         % Calculate batch ordering of maximal Fisher information
@@ -98,41 +104,27 @@ for i=1:length(SNR)
         [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', 10^(-5), ...,
             length(measurements));
         fisherDetMatrix(i,r,:) = fisherInfos;
-        figure;
-        plot(derivativeSeries);
         parfor j=1:length(measurements)
             % Sample data points with the maximal Fisher information
-           currentIdx = idx(1:j);
+            currentIdx = idx(1:j);
             
-         %  try
-                for l=1:nodes
-                    [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
-                        interpret.reconstructSetIter( ...,
-                        timeSeries(currentIdx,:),...,
-                        corrDer(currentIdx,l),lambda, false, 30);
-                    estimate(i,r,j,:,l) = estimateTemp;
-                    mseMatrix(i,r,j,l) = ...,
-                        norm(estimateTemp-groundTruth(:,l),2)/ ...,
-                        norm(groundTruth(:,l),2);
-                    
-                end
-                disp('Pakk');
-%                 resultsRow = [num2str(lambda), ',', ...,
-%                     num2str(SNR(i)), ',', num2str(measurements(j)), ',', ...,
-%                     num2str(mse(i,r,j,l)), newline];
-%                 disp(resultsRow);
-%            catch
-%                 disp('Failed')
-%                 resultsRow = [num2str(lambda), ',', ...,
-%                     num2str(SNR(i)), ',', num2str(measurements(j)), ...,
-%                     ',', 'Ill-conditioned',newline];
-%             end
+            for l=1:nodes
+                [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
+                    interpret.reconstructSetIter( ...,
+                    timeSeries(currentIdx,:),...,
+                    corrDer(currentIdx,l),lambda, false, 30);
+                estimate(i,r,j,:,l) = estimateTemp;
+                mseMatrix(i,r,j,l) = ...,
+                    norm(estimateTemp-groundTruth(:,l),2)/ ...,
+                    norm(groundTruth(:,l),2);
+                
+            end            
         end
         save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
             num2str(numRealisations)]);
     end
-      save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
-            num2str(numRealisations)]);
+    save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
+        num2str(numRealisations)]);
 end
 
 

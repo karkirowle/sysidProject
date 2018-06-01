@@ -7,7 +7,9 @@ close all;
 addpath('checkpoints');
 %load('run_22_May_2018_20_19_31_100_1')
 %load('checkpoints\run_22_May_2018_17_56_59_50_100.mat')
-load('C:\Users\Lenovo\Documents\Bencur\imperial\fourth_year\projekt\sysidProject\VanillaID\checkpoints\run_25_May_2018_02_29_14_50_100.mat')
+%load('C:\Users\Lenovo\Documents\Bencur\imperial\fourth_year\projekt\sysidProject\VanillaID\checkpoints\run_25_May_2018_02_29_14_50_100.mat')
+%load('C:\Users\Lenovo\Documents\Bencur\imperial\fourth_year\projekt\sysidProject\VanillaID\checkpoints\run_26_May_2018_14_43_37_50_200.mat')
+load('run_28_May_2018_11_57_08_50_200');
 rmpath('checkpoints');
 load('colormapStore3');
 
@@ -17,7 +19,11 @@ for i=1:length(SNR)
         %     estimateMatrix = log10(abs(squeeze(estimate(i,1,1:40,:,1))));
         %     estimateMatrix(abs(estimateMatrix) == Inf) = 0;
         %     estimateMatrix = estimateMatrix;
-        estimateMatrix = log10(abs(squeeze(mean(estimate(i,1,:,:,j),1))));
+        estimateMatrix = log10(abs(squeeze(mean(estimate(1,:,:,:,j),2))));
+        estimateMatrix = squeeze(estimateMatrix);
+        
+        % Threshold for ensemble pattern
+        estimateMatrix(estimateMatrix < 0) = -Inf;
         %estimateMatrix = abs(squeeze(mean(estimate(i,1,:,:,1),1)));
         
         %     estimateMatrix(1:40,:) = estimateMatrix./norm(estimateMatrix(1:40,:));
