@@ -1,17 +1,17 @@
 classdef interpretationGraph
     properties (Access = public)
-      basisFunctions
-      geneIdentifier
-      weightList
-      geneList
-      numberOfGenes 
+        basisFunctions
+        geneIdentifier
+        weightList
+        geneList
+        numberOfGenes
     end
     methods
         function obj = interpretationGraph(numberOfGenes)
             obj.numberOfGenes = numberOfGenes;
             obj.basisFunctions = {};
             obj.weightList = [];
-    
+            
         end
         function obj = addBasisFunction(obj, fun)
             obj.basisFunctions(end+1) = {fun};
@@ -24,43 +24,45 @@ classdef interpretationGraph
                 for j=1:numFunctions
                     coeff1 = 1 + (j-1)*states;
                     coeff2 = j*states;
-                    % This evaluates the function for all states/genes
+                    This evaluates the function for all states/genes
                     Phi(k,coeff1:coeff2) = obj.basisFunctions{j}(timeSeries(k,:));
                 end
                 if (bias)
-                Phi(k, numFunctions*states + 1) = 1;
+                    Phi(k, numFunctions*states + 1) = 1;
                 end
             end
         end
         function [obj, w_estimate, cost] = reconstruct(obj, timeSeries, derivativeSeries, lambda)
             Phi = constructDictionary(obj,timeSeries, false);
-            
-%             disp(size(Phi));
-%             disp(size(derivativeSeries));
-            [estimate_temp, cost, ~, ~, ~] = tac_reconstruction(derivativeSeries, Phi, lambda, 5);
+            [estimate_temp, cost, ~, ~, ~, ~, ~] = tac_reconstruction(derivativeSeries, Phi, lambda, 5);
             w_estimate = estimate_temp(:,5);
         end
         function [obj, w_estimate, cost, w_unprunedOut, penalty, ols] = reconstructUnpruned(obj, timeSeries, derivativeSeries, lambda, bias)
-             [w_estimate, cost, w_unprunedOut, penalty, ols, ~]  = ...,
+            [w_estimate, cost, w_unprunedOut, penalty, ols, ~, ~]  = ...,
                 reconstructSetIter(timeSeries, derivativeSeries, ...,
                 lambda, bias, 5);
         end
         function [obj, w_estimate, cost, w_unprunedOut, penalty, ols, convergenceGamma] = reconstructSetIter(obj, timeSeries, derivativeSeries, lambda, bias, iter)
             Phi = constructDictionary(obj,timeSeries, bias);
-            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma] = ...,
+            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma, ~] = ...,
                 tac_reconstruction(derivativeSeries, Phi, lambda, iter);
-            %w_estimate = estimate_temp(:,iter);
             w_unprunedOut = w_unpruned;
-        end 
+        end
+        function [obj, w_estimate, cost, w_unprunedOut, penalty, ols, convergenceGamma, Gamma] = reconstructGamma(obj, timeSeries, derivativeSeries, lambda, bias, iter)
+            Phi = constructDictionary(obj,timeSeries, bias);
+            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma, ~] = ...,
+                tac_reconstruction(derivativeSeries, Phi, lambda, iter);
+            w_unprunedOut = w_unpruned;
+        end
         function motifSeries = motifCalculation(obj, motifInterval, w_estimate, byWhich)
             counter = 0;
             numFunctions = length(obj.basisFunctions);
             coefficients = byWhich:obj.numberOfGenes:(obj.numberOfGenes*numFunctions);
-                for j=2:numFunctions
-                    counter = counter + 1;
-                    motifSeries(counter,:) = w_estimate(coefficients(j))*obj.basisFunctions{j}(motifInterval);
-                end
-                motifSeries = sum(motifSeries,1);
+            for j=2:numFunctions
+                counter = counter + 1;
+                motifSeries(counter,:) = w_estimate(coefficients(j))*obj.basisFunctions{j}(motifInterval);
+            end
+            motifSeries = sum(motifSeries,1);
         end
         
     end
