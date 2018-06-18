@@ -5,7 +5,7 @@ clc;
 clear;
 close all;
 
-node = 5;
+node = 3;
 sim = geneGraph(node);
 
 k = 40;
@@ -22,8 +22,8 @@ end
 
 % Let's simulate the gene regulatory network
 initialConditions = 1:1:node;
-simulationInterval = 0:0.01:100;
-processNoise = 10;
+simulationInterval = 0:0.001:10;
+processNoise = 0;
 
 [derivativeSeries, ...,
     timeSeries] = ...,
@@ -31,4 +31,8 @@ processNoise = 10;
 
 figure;
 plot(simulationInterval, timeSeries, 'LineWidth', 1.5)
+ylabel('Amount of species', 'FontSize', 12);
+xlabel('Time [sec]', 'FontSize', 12);
+title('Concentration curves of GRNs', 'FontSize', 16);
+legend({'[X_{1}]', '[X_{2}]', '[X_{3}]'}, 'FontSize', 16);
 run('figureFormatter');

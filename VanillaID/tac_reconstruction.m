@@ -1,4 +1,4 @@
-function [w_out, cost, w_unpruned, penalty, ols, convergenceGamma] = tac_reconstruction(Output, Dic, lambda,MAXITER)
+function [w_out, cost, w_unpruned, penalty, ols, convergenceGamma, lastGamma] = tac_reconstruction(Output, Dic, lambda,MAXITER)
 %%
 % This is a VANILA implementation of the follwing paper
 % 

@@ -14,11 +14,11 @@ close all;
 
 % ------------------- PARAMETERS: CHANGE WISELY! --------------------------
 measurements = 1:50;
-SNR = [100,4];
+SNR = [0.1, 0.316, 0.0032, 316.2278];
 numRealisations = 200;
 
 % Server parameters
-clusterNumber = 8;
+clusterNumber = 16;
 parpool('local',clusterNumber)
 
 % -------------------------------------------------------------------------
