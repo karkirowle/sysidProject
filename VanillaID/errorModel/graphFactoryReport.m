@@ -24,7 +24,7 @@ for j=1:3
     plot(1:50,squeeze(mean(totalMse(:,:,:,j),2)), 'LineWidth', 1.5);
     xlabel('number of measurements added (inverse MAP covariance)', 'FontSize', 16);
     ylabel('RNMSE', 'FontSize', 16);
-    title(['Error calculated from optimally sampled measurements [X_{', ...,
+    title(['RNMSE calculated from optimally sampled measurements [X_{', ...,
         num2str(j), '}]'], ...,
         'FontSize', 20);
     xlim([1 50]);
@@ -75,7 +75,7 @@ for j=1:3
         
         figure;
         imagesc(estimateMatrix);
-        xlabel('dictionary function', 'FontSize', 16);
+        xlabel('weight associated to the columns of the dictionary', 'FontSize', 16);
         ylabel('number of added measurements (inverse cov)', 'FontSize', 16);
         title(['Evolution of identified weights with measurements SNR=', ...,
             num2str(totalSNR(i)), ' [X_{', num2str(j) '}]'], ...,

@@ -1,62 +1,63 @@
-function [gammaInfos, idx] = maxGammaDictionary(data, lambda, ...,
-    numGamma, previousPhi)
+function [gammaInfo, newPhi, idx] = maxGammaDictionary(data, lambda, ...,
+    previousPhi, previousIdx, Gamma)
 % INPUT
 % data - P * T matrix which contains the values of the dictionary at T time
 % lambda - constant for calculating Fisher information points
-% previousPhi - dictionary from the previous iteration of the algorithm, if
+% previousPhi - L*T where L < P dictionary from the previous iteration of the algorithm, if
 % empty will assume this is the first iteration
-
+% previousIdx - L*1
+% Gamma - P * P
 % OUTPUTS
-% fisherInfo - T * 1 matrix which constains Fisher Information value witch each
+% gammaInfo - T * 1 matrix which constains Fisher Information value witch each
 % added points
+% newPhi - (L+1)*T new dictionary
 % idx - T*1 list of indices which sequentially maximise Fisher information
 
 % Check variance is positive
 assert(lambda >= 0);
+% Check that the selectedIdx is the same damension
+assert(size(previousPhi,2) == size(previousIdx,1),['Previous dcitionary size has ', ...,
+    num2str(size(previousPhi,2)), ' rows while the respective ID vector have only ', ...,
+    num2str(size(previousIdx,1))]);
 
 % Useful constants
 P = size(data,1);
 T = size(data,2);
+L = size(previousIdx,1);
 
-% Preallocation
-idx = zeros(numGamma,1);
-fisherInfos = zeros(numGamma,1);
+
 
 % Check if previousPhi is empty
-if (isempty(previousPhi))
-    
+if (L == 0)
+    selectedIdx = [];
 else
+    selectedIdx = previousIdx;
+end
+
+% Select set of indices included in the maximum search
+indices = (1:T)';
+indices(selectedIdx) = [];
+
+% Calculate the informativeness measure, first preallocate
+gammaSearch = zeros(length(indices),1);
+
+for j=1:length(indices)
+    
+    % Concatenate with previous result
+    X = data(:,[selectedIdx;indices(j)]);
+    
+    % The determinant is taken here to map the information to a scalar (D-optimal)
+    gammaSearch(j) = det(pinv(Gamma)*(lambda*eye(P)) + X * X');
     
 end
 
+% Find maximal Fisher information in the above combination vector
+[maxGamma,maxId] = max(gammaSearch);
+gammaInfo= maxGamma;
 
+% Add the newfound id
+idx = [previousIdx; indices(maxId)];
 
-for i=1:numGamma
-    
-    % Treatment of edge case where there aren't any selected idx yet
-    if (i==1)
-        selectedIdx = [];
-    else
-        selectedIdx = idx(1:i-1);
-    end
-    
-    % Select set of indices above which we desire to perform max search
-    indices = (1:T)';
-    indices(selectedIdx) = [];
-    
-    
-    % Calculate fisher information for each combination
-    gammaSearch = zeros(length(indices),1);
-    for j=1:length(indices)
-        X = data(:,[selectedIdx;indices(j)]);
-        % The determinant is taken here to obtain a scalar (D-optimal)
-        gammaSearch(j) = det(Gamma\(lambda*eye(P)) + X * X');
-    end
-    
-    % Find maximal Fisher information in the above combination vector
-    [maxFisher,maxId] = max(gammaSearch);
-    fisherInfos(i) = maxFisher;
-    idx(i) = indices(maxId);
-end
-
+% Return the new dictionary
+newPhi = data(:,[selectedIdx;indices(maxId)]);
 end

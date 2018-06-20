@@ -24,7 +24,7 @@ classdef interpretationGraph
                 for j=1:numFunctions
                     coeff1 = 1 + (j-1)*states;
                     coeff2 = j*states;
-                    This evaluates the function for all states/genes
+                    %This evaluates the function for all states/genes
                     Phi(k,coeff1:coeff2) = obj.basisFunctions{j}(timeSeries(k,:));
                 end
                 if (bias)
@@ -50,7 +50,7 @@ classdef interpretationGraph
         end
         function [obj, w_estimate, cost, w_unprunedOut, penalty, ols, convergenceGamma, Gamma] = reconstructGamma(obj, timeSeries, derivativeSeries, lambda, bias, iter)
             Phi = constructDictionary(obj,timeSeries, bias);
-            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma, ~] = ...,
+            [w_estimate, cost, w_unpruned, penalty, ols, convergenceGamma, Gamma] = ...,
                 tac_reconstruction(derivativeSeries, Phi, lambda, iter);
             w_unprunedOut = w_unpruned;
         end

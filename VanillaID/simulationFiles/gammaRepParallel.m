@@ -18,15 +18,15 @@ numExperiments = length(SNR);
 numRealisations = 200;
 
 % Server parameters
-clusterNumber = 16;
-parpool('local',clusterNumber)
+% clusterNumber = 2;
+% parpool('local',clusterNumber)
 
 % -------------------------------------------------------------------------
 
 % Fetching date for filename
 filenameDate = datetime('now','Format','default');
 
-% Replacing some characters to underscores so that every file name is legible 
+% Replacing some characters to underscores so that every file name is legible
 dateChar = char(filenameDate);
 dateChar(dateChar == ' ') = '_';
 dateChar(dateChar == '-') = '_';
@@ -68,13 +68,12 @@ corrDerMatrix = zeros(numExperiments,numRealisations,1001,nodes);
 
 % Runge Kutta simulation
 for i=1:numExperiments
+    estimateRTemp = zeros(numRealisations,length(measurements),nodes, numFunctions);
+    mseRTemp = zeros(numRealisations,length(measurements),nodes);
+    
     for r=1:numRealisations
-        % Sampling parameters from an uniform distribution interval [0,1]
-        %parameters = (0.8 + 0.4*rand(nodes,1)) * [40, 1, 3, 0.5, 1];
+        % Sampling parameters from an uniform cdistribution interval [0,1]
         parameters = ones(3,1)*[40,1,3,0.5,1];
-        
-        % For the first differential equation now one is sampled randomly
-        %parameters(1,5) = (0.8 + 0.4*rand) * 40;
         
         % Create topology for the gene regulatory network
         sim = geneGraph(nodes);
@@ -88,7 +87,6 @@ for i=1:numExperiments
         
         % Sampling initialConditions
         initialConditions = [1; 2; 3]; % Symmetry breaking
-        %initialConditions = abs(10*randn(1, nodes));
         
         % Ground truth weights
         groundTruth = sim.standardGroundTruth;
@@ -102,30 +100,47 @@ for i=1:numExperiments
         corrDerMatrix(i,r,:,:) = corrDer;
         lambda = max(0.005, noiseStd^2);
         
-        % Calculate batch ordering of maximal Fisher information
         Phi = interpret.constructDictionary(timeSeries, false);
-        [fisherInfos, idx] = maxFisherDictionaryBatch(Phi', 10^(-5), ...,
-            length(measurements));
-        covDetMatrix(i,r,:) = fisherInfos;
-        parfor j=1:length(measurements)
-            % Sample data points with the maximal Fisher information
-            currentIdx = idx(1:j);
+        estimateMTemp = zeros(length(measurements),nodes,numFunctions);
+        mseMTemp = zeros(length(measurements),nodes);
+        for j=1:length(measurements)
             
+            % Edge case at start
+            if (j == 1)
+                PhiP = [];
+                currentIdx = [];
+                Gamma = ones(1,numFunctions);
+            end
+            
+            % Sample data points with the maximal Fisher information
+            [gammaInfo, PhiP, currentIdx] = maxGammaDictionary(Phi', lambda, ...,
+                PhiP, currentIdx, diag(Gamma));
+            
+            estimateBTemp = zeros(nodes,numFunctions);
+            mseBTemp = zeros(1,nodes);
             for l=1:nodes
-                [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma] = ...,
-                    interpret.reconstructSetIter( ...,
+                [~, estimateTemp, cost, ~, penalty, ols, convergenceGamma,Gamma] = ...,
+                    interpret.reconstructGamma( ...,
                     timeSeries(currentIdx,:),...,
                     corrDer(currentIdx,l),lambda, false, 30);
-                estimate(i,r,j,:,l) = estimateTemp;
-                mseMatrix(i,r,j,l) = ...,
-                    norm(estimateTemp-groundTruth(:,l),2)/ ...,
-                    norm(groundTruth(:,l),2);
+                %estimate(i,r,j,:,l) = estimateTemp;
+                estimateBTemp(l,:) = estimateTemp;
                 
-            end            
+%                 mseMatrix(i,r,j,l) = ...,
+%                     norm(estimateTemp-groundTruth(:,l),2)/ ...,
+%                     norm(groundTruth(:,l),2);
+                mseBTemp = norm(estimateTemp-groundTruth(:,l),2)/ ...,
+                    norm(groundTruth(:,l),2);
+            end
+            estimateMTemp(j,:,:) = estimateBTemp;
+            mseMTemp(j,:) = mseBTemp;
+            
         end
-        save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
-            num2str(numRealisations)]);
+        estimateRTemp(r,:,:,:) = estnumimateMTemp;
+        mseRTemp(r,:,:) = mseMTemp;
     end
+    estimate(i,:,:,:,:) = estimateRTemp;
+    mseMatrix(i,:,:,:) = mseRTemp;
     save(['checkpoints/run_', dateChar, '_', num2str(length(measurements)), '_',  ...,
         num2str(numRealisations)]);
 end
