@@ -2,6 +2,17 @@
 function [corruptedDerivative, noiseStd] =  ...,
     signalCorruption(derivativeSeries, SNR)
 
+    % INPUTS
+    % derivativeSeries - (M*N) time series produced by
+    % simulationLibrary abstracion containing the M gene
+    % concentrations at N time points
+    % SNR - the signal to noise ratio (NOT in dB)
+    % OUTPUTS
+    % corruptedDerivative - the corrupted version of the derivative
+    % signal (additive white Gaussian noise)
+    % noiseStd - the standard deviation of noise on signal. The
+    % square of this value is lambda
+    
 % Parameters
 M = size(derivativeSeries,1);
 N = size(derivativeSeries,2);

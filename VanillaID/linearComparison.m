@@ -1,19 +1,32 @@
+% Bayesian Identification of Gene Regulatory Networks
+% Bence Halpern 2018
+
+
 % Oracle linear regression bounds
+% The aim of this code is to answer the question: Given an unbiased
+% model, what would be the lower bound we could achieve?
+
+% This done via selecting the "true subset" of functions from the
+% dictionary set and performing ordinary Least Square estimation
 
 % Housekeeping
 clc;
 clear;
-close all,
+close all;
 
-% Load data here
+% Put filenames here
 fileList = {'C:\Users\Lenovo\Documents\Bencur\imperial\fourth_year\projekt\sysidProject\VanillaID\checkpoints\run_26_May_2018_14_43_37_50_200.mat' , ...,
     'C:\Users\Lenovo\Documents\Bencur\imperial\fourth_year\projekt\sysidProject\VanillaID\checkpoints\run_28_May_2018_11_57_08_50_200.mat'};
+
+% This line just indicates which one to lead from the cell
 load(fileList{2});
 
 % Best estimator if subset is known
 RNMSE = zeros(length(SNR),numRealisations, length(measurements), 3);
 RNMSE2 = zeros(length(SNR), numRealisations, length(measurements), 3);
+
 previous = [3, 1, 2];
+
 for k = 1:length(SNR)
     for j = 1:3
         for r = 1:numRealisations
@@ -22,12 +35,12 @@ for k = 1:length(SNR)
                 corrDerAct = squeeze(corrDerMatrix(k,r,currentIdx,j));
                 timeSeriesAct = timeSeries(currentIdx,j);
                 timeSeriesAct2 = timeSeries(currentIdx,previous(j));
+                
                 % Degradation function (linear)
                 degFun = (@(x) x);
                 repFun = @(x) 1./(1+x.^4);
                 
                 Dic = [degFun(timeSeriesAct), repFun(timeSeriesAct2)];
-                
                 
                 
                 % Perform regression here
@@ -63,10 +76,8 @@ for k = 1:length(SNR)
         run('figureFormatter');
     end
 end
-% Best estimator if subset is unknown
 
-
-
+% If you wish you can these to a file
 clearvars -except RNMSE RNMSE2
 save oracleLinear
 

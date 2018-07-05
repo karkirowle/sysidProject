@@ -13,6 +13,6 @@ addpath('simulationLibrary');
 
 addpath('simulationFiles');
 
-% Other stuff (graph formatting)
+% Other utilities (graph formatting)
 
 addpath('utilities');

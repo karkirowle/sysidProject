@@ -1,4 +1,7 @@
+% Bayesian Identification of Gene Regulatory Networks
+% Bence Halpern 2018
 % Reconstruction error analysis
+
 
 % Housekeeping
 clc;

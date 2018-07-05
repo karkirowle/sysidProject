@@ -1,3 +1,6 @@
+% Bayesian Identification of Gene Regulatory Networks
+% Bence Halpern 2018
+
 % The following script loads SNR results from a list of mat files and
 % combines them
 

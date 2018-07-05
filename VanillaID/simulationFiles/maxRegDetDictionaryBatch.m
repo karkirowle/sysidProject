@@ -1,4 +1,4 @@
-function [fisherInfos, idx] = maxTraceFisherDictionaryBatch(data, lambda, numFisher)
+function [fisherInfos, idx] = maxRegDetDictionaryBatch(data, lambda, numFisher)
 % INPUT
 % data - P * T matrix which contains the values of the dictionary at T time
 % lambda - constant for calculating Fisher information points
@@ -8,7 +8,6 @@ function [fisherInfos, idx] = maxTraceFisherDictionaryBatch(data, lambda, numFis
 % added points
 % idx - T*1 list of indices which sequentially maximise Fisher information
 
-% TODO: optionally other optimality techniques
 
 % Useful constants
 P = size(data,1);
